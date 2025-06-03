@@ -1,0 +1,34 @@
+name: Update favicon version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Replace version placeholder in HTML
+        run: |
+          sed -i "s/__VERSION__/${COMMIT_HASH}/g" 吃豆精靈.html
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add 吃豆精靈.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Update favicon version to ${COMMIT_HASH}"
+            git push
+          else
+            echo "No changes to commit"
+          fi
