@@ -2,9 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大元版吃豆精靈1</title>
- <link rel="icon" href="Pacman_logo.png?v=20250604" type="image/png" />
+  <title>吃豆精靈 - 進階版</title>
+  <link rel="icon" href="Pacman_logo.png?v=20250604" type="image/png" />
   <style>
     body {
       background: black;
@@ -135,198 +134,189 @@
   </style>
 </head>
 <body>
-  <h1>大元版吃豆精靈</h1>
-  <p>最好玩的吃豆精靈!</p>
-  <div id="instructions">使用方向鍵、WASD鍵，或虛擬搖桿來靈活操控你的吃豆精靈吧！</div>
-  <div id="info-bar">
-    <span id="game-status">遊戲進行中</span>
-    <span id="remaining-dots">剩餘豆子: 100</span>
-    <span id="current-score">得分: 0</span>
+<h1>大元版吃豆精靈</h1>
+<p>最好玩的吃豆精靈!</p>
+<div id="instructions">使用方向鍵、WASD鍵，或虛擬搖桿來靈活操控你的吃豆精靈吧！</div>
+<div id="info-bar">
+  <span id="game-status">遊戲進行中</span>
+  <span id="remaining-dots">剩餘豆子: 100</span>
+  <span id="current-score">得分: 0</span>
+</div>
+<div id="game">
+  <div class="pacman" id="pacman"></div>
+  <div class="ghost" id="ghost"></div>
+  <div id="gameover">
+    <span id="gameover-text">遊戲結束！</span>
+    <button id="restartButton">重新開始</button>
   </div>
-  <div id="game">
-    <div class="pacman" id="pacman"></div>
-    <div class="ghost" id="ghost"></div>
-    <div id="gameover">
-      <span id="gameover-text">遊戲結束！</span>
-      <button id="restartButton">重新開始</button>
-    </div>
+</div>
+<div id="joystick-container">
+  <div id="joystick-base">
+    <div id="joystick-knob"></div>
   </div>
-  <div id="joystick-container">
-    <div id="joystick-base">
-      <div id="joystick-knob"></div>
-    </div>
-  </div>
-  <script>
-    const pacman = document.getElementById('pacman');
-    const ghost = document.getElementById('ghost');
-    const game = document.getElementById('game');
-    const scoreDisplay = document.getElementById('current-score');
-    const remainingDotsDisplay = document.getElementById('remaining-dots');
-    const gameStatusDisplay = document.getElementById('game-status');
-    const gameoverDisplay = document.getElementById('gameover');
-    const gameoverText = document.getElementById('gameover-text');
-    const restartButton = document.getElementById('restartButton');
-    const gameSize = 400;
-    const pacmanSize = 20;
-    const moveStep = 20;
-    let x = 0, y = 0;
-    let ghostX = 380, ghostY = 380;
-    let score = 0;
-    let playing = true;
-    let totalDots = 0;
-    let dots = [];
+</div>
+<script>
+const pacman = document.getElementById('pacman');
+const ghost = document.getElementById('ghost');
+const game = document.getElementById('game');
+const scoreDisplay = document.getElementById('current-score');
+const remainingDotsDisplay = document.getElementById('remaining-dots');
+const gameStatusDisplay = document.getElementById('game-status');
+const gameoverDisplay = document.getElementById('gameover');
+const gameoverText = document.getElementById('gameover-text');
+const restartButton = document.getElementById('restartButton');
+const gameSize = 400;
+const pacmanSize = 20;
+const moveStep = 20;
+let x = 0, y = 0;
+let ghostX = 380, ghostY = 380;
+let score = 0;
+let playing = true;
+let totalDots = 0;
+let dots = [];
 
-    function createDots() {
-      dots.forEach(dot => dot.remove());
-      dots = [];
-      totalDots = 0;
-      for (let i = 0; i < gameSize; i += 40) {
-        for (let j = 0; j < gameSize; j += 40) {
-          const dot = document.createElement('div');
-          dot.classList.add('dot');
-          dot.style.left = `${i + 17}px`;
-          dot.style.top = `${j + 17}px`;
-          game.appendChild(dot);
-          dots.push(dot);
-          totalDots++;
-        }
-      }
-      remainingDotsDisplay.textContent = `剩餘豆子: ${totalDots}`;
+function createDots() {
+  dots.forEach(dot => dot.remove());
+  dots = [];
+  totalDots = 0;
+  for (let i = 0; i < gameSize; i += 40) {
+    for (let j = 0; j < gameSize; j += 40) {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      dot.style.left = `${i + 17}px`;
+      dot.style.top = `${j + 17}px`;
+      game.appendChild(dot);
+      dots.push(dot);
+      totalDots++;
     }
-
-    function resetGame() {
-      x = 0;
-      y = 0;
-      ghostX = 380;
-      ghostY = 380;
-      score = 0;
-      totalDots = 0;
-      playing = true;
+  }
+  remainingDotsDisplay.textContent = `剩餘豆子: ${totalDots}`;
+}
+createDots();
+function resetGame() {
+  x = 0;
+  y = 0;
+  ghostX = 380;
+  ghostY = 380;
+  score = 0;
+  totalDots = 0;
+  playing = true;
+  scoreDisplay.textContent = `得分: ${score}`;
+  remainingDotsDisplay.textContent = `剩餘豆子: ${totalDots}`;
+  pacman.style.left = `${x}px`;
+  pacman.style.top = `${y}px`;
+  ghost.style.left = `${ghostX}px`;
+  ghost.style.top = `${ghostY}px`;
+  gameoverDisplay.style.display = 'none';
+  createDots();
+  gameStatusDisplay.textContent = '遊戲進行中';
+  gameoverText.textContent = '遊戲結束！';
+}
+document.addEventListener('keydown', (e) => {
+  if (!playing) return;
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
+  if (e.key === 'd' || e.key === 'ArrowRight') if (x + moveStep < gameSize) x += moveStep;
+  if (e.key === 'a' || e.key === 'ArrowLeft') if (x - moveStep >= 0) x -= moveStep;
+  if (e.key === 's' || e.key === 'ArrowDown') if (y + moveStep < gameSize) y += moveStep;
+  if (e.key === 'w' || e.key === 'ArrowUp') if (y - moveStep >= 0) y -= moveStep;
+  pacman.style.left = `${x}px`;
+  pacman.style.top = `${y}px`;
+  checkCollision();
+});
+function checkCollision() {
+  dots.forEach((dot, index) => {
+    const dx = parseInt(dot.style.left) - x;
+    const dy = parseInt(dot.style.top) - y;
+    if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
+      dot.remove();
+      dots.splice(index, 1);
+      score += 10;
+      remainingDotsDisplay.textContent = `剩餘豆子: ${dots.length}`;
       scoreDisplay.textContent = `得分: ${score}`;
-      remainingDotsDisplay.textContent = `剩餘豆子: ${totalDots}`;
-      pacman.style.left = `${x}px`;
-      pacman.style.top = `${y}px`;
-      ghost.style.left = `${ghostX}px`;
-      ghost.style.top = `${ghostY}px`;
-      gameoverDisplay.style.display = 'none';
-      createDots();
-      gameStatusDisplay.textContent = '遊戲進行中';
-      gameoverText.textContent = '遊戲結束！';
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (!playing) return;
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
-      if (e.key === 'd' || e.key === 'ArrowRight') if (x + moveStep < gameSize) x += moveStep;
-      if (e.key === 'a' || e.key === 'ArrowLeft') if (x - moveStep >= 0) x -= moveStep;
-      if (e.key === 's' || e.key === 'ArrowDown') if (y + moveStep < gameSize) y += moveStep;
-      if (e.key === 'w' || e.key === 'ArrowUp') if (y - moveStep >= 0) y -= moveStep;
-      pacman.style.left = `${x}px`;
-      pacman.style.top = `${y}px`;
-      checkCollision();
-    });
-
-    function checkCollision() {
-      dots.forEach((dot, index) => {
-        const dx = parseInt(dot.style.left) - x;
-        const dy = parseInt(dot.style.top) - y;
-        if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
-          dot.remove();
-          dots.splice(index, 1);
-          score += 10;
-          remainingDotsDisplay.textContent = `剩餘豆子: ${dots.length}`;
-          scoreDisplay.textContent = `得分: ${score}`;
-          if (score >= 1000) {
-            gameStatusDisplay.textContent = '恭喜你通關了！';
-            playing = false;
-            gameoverDisplay.style.display = 'flex';
-            gameoverText.textContent = '恭喜你通關了！';
-          }
-        }
-      });
-    }
-
-    function moveGhost() {
-      if (!playing) return;
-      let direction = Math.random() < 0.5 ? '追蹤' : '亂走';
-      if (direction === '追蹤') {
-        if (ghostX < x) ghostX += moveStep;
-        else if (ghostX > x) ghostX -= moveStep;
-        if (ghostY < y) ghostY += moveStep;
-        else if (ghostY > y) ghostY -= moveStep;
-      } else {
-        let rand = Math.floor(Math.random() * 4);
-        if (rand === 0 && ghostX + moveStep < gameSize) ghostX += moveStep;
-        if (rand === 1 && ghostX - moveStep >= 0) ghostX -= moveStep;
-        if (rand === 2 && ghostY + moveStep < gameSize) ghostY += moveStep;
-        if (rand === 3 && ghostY - moveStep >= 0) ghostY -= moveStep;
-      }
-      ghost.style.left = `${ghostX}px`;
-      ghost.style.top = `${ghostY}px`;
-      checkGameOver();
-    }
-
-    function checkGameOver() {
-      const dx = ghostX - x;
-      const dy = ghostY - y;
-      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+      if (score >= 1000) {
+        gameStatusDisplay.textContent = '恭喜你通關了！';
         playing = false;
-        gameStatusDisplay.textContent = '遊戲結束！';
         gameoverDisplay.style.display = 'flex';
-        gameoverText.textContent = '遊戲結束！';
+        gameoverText.textContent = '恭喜你通關了！';
       }
     }
-
-    restartButton.addEventListener('click', resetGame);
-    setInterval(moveGhost, 500);
-
-    const knob = document.getElementById("joystick-knob");
-    const base = document.getElementById("joystick-base");
-    let dragging = false;
-    knob.addEventListener("mousedown", startDrag);
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("mouseup", endDrag);
-    knob.addEventListener("touchstart", startDrag);
-    document.addEventListener("touchmove", drag);
-    document.addEventListener("touchend", endDrag);
-
-    function startDrag(e) {
-      dragging = true;
-    }
-
-    function drag(e) {
-      if (!dragging || !playing) return;
-      const rect = base.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      let dx = clientX - centerX;
-      let dy = clientY - centerY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > 50) {
-        dx = (dx / dist) * 50;
-        dy = (dy / dist) * 50;
-      }
-      knob.style.left = `${35 + dx}px`;
-      knob.style.top = `${35 + dy}px`;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 15 && x + moveStep < gameSize) x += moveStep;
-        if (dx < -15 && x - moveStep >= 0) x -= moveStep;
-      } else {
-        if (dy > 15 && y + moveStep < gameSize) y += moveStep;
-        if (dy < -15 && y - moveStep >= 0) y -= moveStep;
-      }
-      pacman.style.left = `${x}px`;
-      pacman.style.top = `${y}px`;
-      checkCollision();
-    }
-
-    function endDrag() {
-      dragging = false;
-      knob.style.left = "35px";
-      knob.style.top = "35px";
-    }
-  </script>
+  });
+}
+function moveGhost() {
+  if (!playing) return;
+  let direction = Math.random() < 0.5 ? '追蹤' : '亂走';
+  if (direction === '追蹤') {
+    if (ghostX < x) ghostX += moveStep;
+    else if (ghostX > x) ghostX -= moveStep;
+    if (ghostY < y) ghostY += moveStep;
+    else if (ghostY > y) ghostY -= moveStep;
+  } else {
+    let rand = Math.floor(Math.random() * 4);
+    if (rand === 0 && ghostX + moveStep < gameSize) ghostX += moveStep;
+    if (rand === 1 && ghostX - moveStep >= 0) ghostX -= moveStep;
+    if (rand === 2 && ghostY + moveStep < gameSize) ghostY += moveStep;
+    if (rand === 3 && ghostY - moveStep >= 0) ghostY -= moveStep;
+  }
+  ghost.style.left = `${ghostX}px`;
+  ghost.style.top = `${ghostY}px`;
+  checkGameOver();
+}
+function checkGameOver() {
+  const dx = ghostX - x;
+  const dy = ghostY - y;
+  if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+    playing = false;
+    gameStatusDisplay.textContent = '遊戲結束！';
+    gameoverDisplay.style.display = 'flex';
+    gameoverText.textContent = '遊戲結束！';
+  }
+}
+restartButton.addEventListener('click', resetGame);
+setInterval(moveGhost, 500);
+const knob = document.getElementById("joystick-knob");
+const base = document.getElementById("joystick-base");
+let dragging = false;
+knob.addEventListener("mousedown", startDrag);
+document.addEventListener("mousemove", drag);
+document.addEventListener("mouseup", endDrag);
+knob.addEventListener("touchstart", startDrag);
+document.addEventListener("touchmove", drag);
+document.addEventListener("touchend", endDrag);
+function startDrag(e) {
+  dragging = true;
+}
+function drag(e) {
+  if (!dragging || !playing) return;
+  const rect = base.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  let dx = clientX - centerX;
+  let dy = clientY - centerY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > 50) {
+    dx = (dx / dist) * 50;
+    dy = (dy / dist) * 50;
+  }
+  knob.style.left = `${35 + dx}px`;
+  knob.style.top = `${35 + dy}px`;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 15 && x + moveStep < gameSize) x += moveStep;
+    if (dx < -15 && x - moveStep >= 0) x -= moveStep;
+  } else {
+    if (dy > 15 && y + moveStep < gameSize) y += moveStep;
+    if (dy < -15 && y - moveStep >= 0) y -= moveStep;
+  }
+  pacman.style.left = `${x}px`;
+  pacman.style.top = `${y}px`;
+  checkCollision();
+}
+function endDrag() {
+  dragging = false;
+  knob.style.left = "35px";
+  knob.style.top = "35px";
+}
+</script>
 </body>
 </html>
